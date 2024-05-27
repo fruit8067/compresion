@@ -1,15 +1,16 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include "Input_file.h"
+#include <string>
+#include "input_file.h"
 
 
 using namespace std;
 
 
-std::vector<unsigned char> input_file() {
+vector<unsigned char> input_file(string path) {
     ifstream file;
-    file.open("test.txt", ios::in | ios::binary);
+    file.open(path, ios::in | ios::binary);
 
     if (!file.is_open()) {
         cout << "Falied to open file.\n";

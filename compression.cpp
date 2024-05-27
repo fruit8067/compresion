@@ -40,7 +40,7 @@ std::vector<Token> compressLZ77(const std::string& input, int windowSize) {
 }
 
 int main() {
-    std::string input = input_file();
+    vector<unsigned char> input = input_file(./test.txt);
     int windowSize = 4;
 
     std::vector<Token> compressed = compressLZ77(input, windowSize);

@@ -1,13 +1,13 @@
 #include <iostream>
 #include <fstream>
-#include <string>
+#include <vector>
 #include "Input_file.h"
 
 
 using namespace std;
 
 
-std::string input_file() {
+std::vector<unsigned char> input_file() {
     ifstream file;
     file.open("test.txt", ios::in | ios::binary);
 
@@ -19,17 +19,14 @@ std::string input_file() {
         return 0;
     }
     
-    string str;
-    int c;
-    int i = 0;
-    while ((c = file.get()) != EOF && i < 1000) {
-
-        str += c;
-
-        i += 1;
+    vector<unsigned char> res;
+    unsigned char c;
+     
+    while ((c = file.get()) != EOF) {
+        res.push_back(c);
     }
 
     file.close();
 
-    return str;
+    return res;
 }

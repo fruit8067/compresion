@@ -17,14 +17,14 @@ vector<unsigned char> input_file(string path) {
 
         file.close();
 
-        return 0;
+        return vector<unsigned char>();
     }
     
     vector<unsigned char> res;
-    unsigned char c;
-     
+    int c;
+    
     while ((c = file.get()) != EOF) {
-        res.push_back(c);
+        res.push_back((unsigned char)c);
     }
 
     file.close();

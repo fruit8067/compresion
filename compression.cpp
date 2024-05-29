@@ -6,10 +6,10 @@
 struct Token {
     int offset;
     int length;
-    char nextChar;
+    unsigned char nextChar;
 };
 
-std::vector<Token> compressLZ77(const std::string& input, int windowSize) {
+std::vector<Token> compressLZ77(const std::vector<unsigned char> input, int windowSize) {
     std::vector<Token> tokens;
     int inputSize = input.size();
     int currentIndex = 0;
@@ -40,14 +40,14 @@ std::vector<Token> compressLZ77(const std::string& input, int windowSize) {
 }
 
 int main() {
-    vector<unsigned char> input = input_file(./test.txt);
-    int windowSize = 4;
+    vector<unsigned char> input = input_file("./test.txt");
+    int windowSize = 10000;
 
     std::vector<Token> compressed = compressLZ77(input, windowSize);
 
     std::cout << "Compressed data:\n";
     for (const auto& token : compressed) {
-        std::cout << "(" << token.offset << "," << token.length << "," << token.nextChar << ")\n";
+        std::cout << token.offset << "," << token.length << "," << (int)token.nextChar << " ";
     }
 
     return 0;

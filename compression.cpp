@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include "input_file.cpp"
 #include <stdlib.h>
+#include <fstream> 
 #define Q_SZ 100
 
 //만들어진 허프만 코드는 여기에 이진수 형태로 저장된다.
@@ -192,38 +193,59 @@ std::vector<Token> compressLZ77(const std::vector<unsigned char> input, int wind
     return tokens;
 }
 
+//data : 2진수 허프만부호화, charFreq : 문자 빈도수, intFreq: 숫자 빈도수
+void makeAFile(std::string data, std::unordered_map<char, int> charFreq, int intFreq[10]){
+    std::ofstream outfile ("output.sngr");
+
+    //'='는 binary가 끝났음을 의미함
+    outfile << data << "=" << std::endl;
+
+    for(pair<char,int> elem : charFreq){
+        outfile << elem.first << ": " << elem.second << std::endl;
+    }
+    for(int i = 0; i<10; i++){
+        if(intFreq[i] == 0){
+            continue;
+        }
+        //enqueue(createNode(static_cast<char>(48 + i), intFreq[i]));
+        outfile << i << ": " << intFreq[i] << std::endl;
+    }
+    outfile.close();
+
+}
 int main() {
     vector<unsigned char> input = input_file("./test.txt");
     int windowSize = 10000;
 
     std::vector<Token> compressed = compressLZ77(input, windowSize);
 
-    std::string HuffmanCodeInput;
+    std::string Lz77Output;
     std::unordered_map<char, int> charFreq;
     int intFreq[10] ={0,0,0,0,0,0,0,0,0,0};
     for (const auto& token : compressed) {
         //std::cout << token.offset << "," << token.length << "," << token.nextChar << "/";
-        char str[1];
-        HuffmanCodeInput += std::to_string(token.offset);
+        Lz77Output += "(";
+        charFreq['('] += 1;
+        Lz77Output += std::to_string(token.offset);
         intFreq[token.offset] = intFreq[token.offset] + 1;
 
-        HuffmanCodeInput += ",";
+        Lz77Output += ",";
         charFreq[','] += 1;
 
-        HuffmanCodeInput += std::to_string(token.length);
+        Lz77Output += std::to_string(token.length);
         intFreq[token.length] = intFreq[token.length] + 1;
 
-        HuffmanCodeInput += ",";
+        Lz77Output += ",";
         charFreq[','] += 1;
 
-        HuffmanCodeInput.push_back(token.nextChar);
+        Lz77Output.push_back(token.nextChar);
         charFreq[token.nextChar] += 1;
 
-        HuffmanCodeInput += "/";
-        charFreq['/'] += 1;
+        Lz77Output += ")";
+        charFreq[')'] += 1;
     }
 
-    //std::cout << HuffmanCodeInput << "\n";
+    //std::cout << Lz77Output << "\n";
     for(pair<char,int> elem : charFreq){
         enqueue(createNode(elem.first, elem.second));
     }
@@ -240,11 +262,21 @@ int main() {
     //std::cout << completed_node->freq;
 
     genHuffmanCode(completed_node);
+    std::cout<< Lz77Output <<std::endl;
     for(std::pair<char, std::string> elem : HuffmanCodeTable){
         std::cout<<"key : "<<elem.first<<" value : "<<elem.second<<std::endl;
     }
 
+    std::string outputData;
+    for(char chr : Lz77Output){
+        outputData += HuffmanCodeTable[chr];
+    }
+
+    std::cout<<outputData;
+    makeAFile(outputData, charFreq, intFreq);
     free(completed_node);
+
+    
     return 0;
 }
 

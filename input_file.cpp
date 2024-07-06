@@ -10,10 +10,10 @@ using namespace std;
 
 vector<unsigned char> input_file(string path) {
     ifstream file;
-    file.open(path, ios::in | ios::binary);
+    file.open(path);
 
     if (!file.is_open()) {
-        cout << "Falied to open file.\n";
+        cout << "Falied to open file. wtfadf\n";
 
         file.close();
 

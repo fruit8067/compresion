@@ -3,14 +3,29 @@
 #include <vector>
 #include <unordered_map>
 #include "input_file.cpp"
+#include <fstream>
 #include <stdlib.h>
-#include <fstream> 
 #define Q_SZ 100
+
+std::unordered_map<char, int> charFreq;
+int intFreq[10] ={0,0,0,0,0,0,0,0,0,0};
+
+void Lz77OutputCharFrequency(std::string output){
+    for(int i = 0; i < output.length(); i++){
+        if(isdigit(output[i])){
+            intFreq[(int)output[i]] += 1;
+        }
+        else{
+            charFreq[output[i]] += 1;
+        }
+    }
+}
+
 
 //만들어진 허프만 코드는 여기에 이진수 형태로 저장된다.
 std::unordered_map<char, std::string> HuffmanCodeTable;
 struct node{
-    char c; // 허프만 코드 할당 문자
+    char c; // 허프만 코드 할당 문자t
     int freq; //빈도수
     struct node* left;
     struct node* right;
@@ -212,39 +227,28 @@ void makeAFile(std::string data, std::unordered_map<char, int> charFreq, int int
     }
     outfile.close();
 
-}
+} 
+
 int main() {
-    vector<unsigned char> input = input_file("./test.txt");
+    vector<unsigned char> input = input_file("C:\\Users\\user\\Downloads\\compresion\\test.txt");
     int windowSize = 10000;
 
     std::vector<Token> compressed = compressLZ77(input, windowSize);
 
     std::string Lz77Output;
-    std::unordered_map<char, int> charFreq;
-    int intFreq[10] ={0,0,0,0,0,0,0,0,0,0};
+
     for (const auto& token : compressed) {
         //std::cout << token.offset << "," << token.length << "," << token.nextChar << "/";
         Lz77Output += "(";
-        charFreq['('] += 1;
         Lz77Output += std::to_string(token.offset);
-        intFreq[token.offset] = intFreq[token.offset] + 1;
-
         Lz77Output += ",";
-        charFreq[','] += 1;
-
         Lz77Output += std::to_string(token.length);
-        intFreq[token.length] = intFreq[token.length] + 1;
-
         Lz77Output += ",";
-        charFreq[','] += 1;
-
         Lz77Output.push_back(token.nextChar);
-        charFreq[token.nextChar] += 1;
-
         Lz77Output += ")";
-        charFreq[')'] += 1;
     }
 
+    Lz77OutputCharFrequency(Lz77Output);
     //std::cout << Lz77Output << "\n";
     for(pair<char,int> elem : charFreq){
         enqueue(createNode(elem.first, elem.second));
@@ -272,26 +276,9 @@ int main() {
         outputData += HuffmanCodeTable[chr];
     }
 
-    std::cout<<outputData;
+    std::cout<< "\n"<<outputData;
     makeAFile(outputData, charFreq, intFreq);
     free(completed_node);
 
-    
     return 0;
 }
-
-
-//enqueue testing
-
-//    for(int i = 1; i<=idx; i++){
- //       printf("%c, %d \n", PQUE[i]->c, PQUE[i]->freq);
- //   }
-
-//dequeue testing
-
-//    while(1){
-//        struct node* temp = dequeue();
- //       if(temp != 0){
-  //          printf("%c --------------> %d \n", temp->c, temp->freq);
- //       }
- //   }

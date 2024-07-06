@@ -213,7 +213,7 @@ std::vector<Token> compressLZ77(const std::vector<unsigned char> input, int wind
 }
 
 //data : 2진수 허프만부호화, charFreq : 문자 빈도수, intFreq: 숫자 빈도수
-void makeAFile(std::string data, std::unordered_map<char, int> charFreq, int intFreq[10]){
+/**void makeAFile(std::string data, std::unordered_map<char, int> charFreq, int intFreq[10]){
     FILE* fp = fopen("./output/output.sngr", "wb");
 
 	DWORD64 length = data.length();
@@ -259,7 +259,7 @@ void makeAFile(std::string data, std::unordered_map<char, int> charFreq, int int
 
     free(val);
 	fclose(fp);
-} 
+} **/
 
 //entire compression(encode) process function
 int main() {

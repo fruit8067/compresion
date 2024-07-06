@@ -5,7 +5,26 @@
 #include "input_file.cpp"
 #include <stdlib.h>
 #include <fstream> 
+#include <bitset>
+#include <windows.h>
+#include <cstdint>
 #define Q_SZ 100
+
+
+std::unordered_map<char, int> charFreq;
+int intFreq[10] ={0,0,0,0,0,0,0,0,0,0};
+
+void Lz77OutputCharFrequency(std::string output){
+    for(int i = 0; i < output.length(); i++){
+        if(isdigit(output[i])){
+            intFreq[(int)output[i]] += 1;
+        }
+        else{
+            charFreq[output[i]] += 1;
+        }
+    }
+}
+
 
 //만들어진 허프만 코드는 여기에 이진수 형태로 저장된다.
 std::unordered_map<char, std::string> HuffmanCodeTable;
@@ -195,24 +214,54 @@ std::vector<Token> compressLZ77(const std::vector<unsigned char> input, int wind
 
 //data : 2진수 허프만부호화, charFreq : 문자 빈도수, intFreq: 숫자 빈도수
 void makeAFile(std::string data, std::unordered_map<char, int> charFreq, int intFreq[10]){
-    std::ofstream outfile ("output.sngr");
+    FILE* fp = fopen("./output/output.sngr", "wb");
 
-    //'='는 binary가 끝났음을 의미함
-    outfile << data << "=" << std::endl;
+	DWORD64 length = data.length();
+    BYTE* val = (BYTE*)malloc(length);
 
-    for(pair<char,int> elem : charFreq){
-        outfile << elem.first << ": " << elem.second << std::endl;
+    for (int i = 0; i < length; i++) {
+        val[i] = std::stoi(data.substr(i*8, 8), nullptr, 2);
     }
-    for(int i = 0; i<10; i++){
-        if(intFreq[i] == 0){
+
+	fwrite(&length, sizeof(DWORD32), 1, fp);
+    fwrite(val, sizeof(BYTE), length, fp);
+
+    BYTE totFreq = charFreq.size();
+
+    for(int i = 0; i<10; i++) {
+        if(intFreq[i] == 0) {
             continue;
         }
-        //enqueue(createNode(static_cast<char>(48 + i), intFreq[i]));
-        outfile << i << ": " << intFreq[i] << std::endl;
-    }
-    outfile.close();
 
-}
+        totFreq += 1;
+    }
+
+    fwrite(&totFreq, sizeof(BYTE), 1, fp);
+
+    for(int i = 0; i<10; i++) {
+        if(intFreq[i] == 0) {
+            continue;
+        }
+
+        BYTE key = i;
+        int value = intFreq[i];
+        fwrite(&key, sizeof(BYTE), 1, fp);
+        fwrite(&value, sizeof(int), 1, fp);
+    }
+
+
+    for(pair<char,int> elem : charFreq) {
+        char key = elem.first;
+        int value = elem.second;
+        fwrite(&key, 1, 1, fp);
+        fwrite(&value, sizeof(int), 1, fp);
+    }
+
+    free(val);
+	fclose(fp);
+} 
+
+//entire compression(encode) process function
 int main() {
     vector<unsigned char> input = input_file("./test.txt");
     int windowSize = 10000;
@@ -220,40 +269,32 @@ int main() {
     std::vector<Token> compressed = compressLZ77(input, windowSize);
 
     std::string Lz77Output;
-    std::unordered_map<char, int> charFreq;
-    int intFreq[10] ={0,0,0,0,0,0,0,0,0,0};
+
+
     for (const auto& token : compressed) {
         //std::cout << token.offset << "," << token.length << "," << token.nextChar << "/";
         Lz77Output += "(";
-        charFreq['('] += 1;
         Lz77Output += std::to_string(token.offset);
-        intFreq[token.offset] = intFreq[token.offset] + 1;
-
         Lz77Output += ",";
-        charFreq[','] += 1;
-
         Lz77Output += std::to_string(token.length);
-        intFreq[token.length] = intFreq[token.length] + 1;
-
         Lz77Output += ",";
-        charFreq[','] += 1;
-
         Lz77Output.push_back(token.nextChar);
-        charFreq[token.nextChar] += 1;
-
         Lz77Output += ")";
-        charFreq[')'] += 1;
     }
 
+    Lz77OutputCharFrequency(Lz77Output);
     //std::cout << Lz77Output << "\n";
     for(pair<char,int> elem : charFreq){
         enqueue(createNode(elem.first, elem.second));
+        cout << elem.first << " " << elem.second << endl;
     }
+
     for(int i = 0; i<10; i++){
         if(intFreq[i] == 0){
             continue;
         }
         enqueue(createNode(static_cast<char>(48 + i), intFreq[i]));
+        cout << i << " " << intFreq[i] << endl;
     }
 
     //완성된 노드
@@ -273,10 +314,9 @@ int main() {
     }
 
     std::cout<<outputData;
-    makeAFile(outputData, charFreq, intFreq);
+    //makeAFile(outputData, charFreq, intFreq);
     free(completed_node);
 
-    
     return 0;
 }
 

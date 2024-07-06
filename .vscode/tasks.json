@@ -48,11 +48,7 @@
         {
             "type": "cppbuild",
             "label": "C/C++: g++.exe build active file",
-<<<<<<< HEAD
-            "command": "C:\\MinGW\\bin\\g++.exe",
-=======
             "command": "C:/mingw64/bin/g++.exe",
->>>>>>> 0dab10c2b256462df748e2b4c7c0890a467ab916
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
@@ -61,11 +57,7 @@
                 "${fileDirname}\\${fileBasenameNoExtension}.exe"
             ],
             "options": {
-<<<<<<< HEAD
-                "cwd": "${fileDirname}"
-=======
                 "cwd": "C:/mingw64/bin"
->>>>>>> 0dab10c2b256462df748e2b4c7c0890a467ab916
             },
             "problemMatcher": [
                 "$gcc"
